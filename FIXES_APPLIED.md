@@ -88,12 +88,36 @@ Then rebuild:
 .\gradlew.bat assembleDebug
 ```
 
+## Map Filtering Functionality - FIXED ✅
+
+### Issue
+Filter dialog showed options but didn't actually filter the map panels.
+
+### Fix Applied
+Added complete filtering logic to `SiteMapActivity.java`:
+
+1. Added `currentFilter` state variable to track active filter
+2. Implemented `shouldShowPanel()` method to determine panel visibility based on filter
+3. Updated `showFilterDialog()` to set filter state and regenerate map
+4. Modified `createPanelDot()` to apply filter visibility
+
+### Filter Options
+- **Show All Panels**: Displays all panels (default)
+- **Show Faults Only**: Shows only critical and warning panels
+- **Show Warnings**: Shows only warning panels
+- **Show Uninspected**: Shows only uninspected panels
+
+### Files Updated
+- `app/src/main/java/com/flir/atlassdk/acecamerasample/SiteMapActivity.java`
+
 ## Current Build Status
 
 ### ✅ Fixed Issues
 1. XML entity reference error (ampersand not escaped)
 2. Button alignment issues across all screens
 3. All layout files validated
+4. Map filtering functionality implemented
+5. Report button on Inspection History page
 
 ### ⚠️ Remaining Issue
 1. Java version mismatch - requires Java 21 installation
