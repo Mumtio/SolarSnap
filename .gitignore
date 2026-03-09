@@ -12,3 +12,6 @@
 /captures
 .externalNativeBuild
 .cxx
+
+# FLIR SDK libraries (too large for GitHub - 101+ MB)
+app/libs/*.aar
