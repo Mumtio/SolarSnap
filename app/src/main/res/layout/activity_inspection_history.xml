@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/black">
+
+    <!-- 1. BREADCRUMB NAVIGATION -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/colorPrimary"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Home > SolarSnap > History"
+            android:textColor="@color/white"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/historyFilterIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚙"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/historyExportIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📤"
+            android:textColor="@color/white"
+            android:textSize="18sp"/>
+    </LinearLayout>
+
+    <!-- 2. FILTER AND SEARCH BAR -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/cardBackground"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SEARCH PANEL ID"
+            android:textColor="@color/colorAccent"
+            android:textSize="11sp"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/searchPanelInput"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="PNL-A7-4402"
+            android:textColor="@color/white"
+            android:textColorHint="@color/colorLightGray"
+            android:background="@color/colorPrimary"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="FILTERS"
+            android:textColor="@color/colorAccent"
+            android:textSize="11sp"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false">
+
+            <Button
+                android:id="@+id/buttonFilterAll"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="48dp"
+                android:text="All"
+                android:textSize="12sp"
+                android:backgroundTint="@color/colorAccent"
+                android:textColor="@color/black"
+                android:layout_marginEnd="6dp"
+                android:layout_gravity="center_vertical"/>
+
+            <Button
+                android:id="@+id/buttonFilterFaults"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="48dp"
+                android:text="Faults"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:layout_marginEnd="6dp"
+                android:layout_gravity="center_vertical"/>
+
+            <Button
+                android:id="@+id/buttonFilterCritical"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="48dp"
+                android:text="Critical"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:layout_marginEnd="6dp"
+                android:layout_gravity="center_vertical"/>
+
+            <Button
+                android:id="@+id/buttonFilterToday"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="48dp"
+                android:text="Today"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 3. INSPECTION LIST -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="INSPECTION RECORDS"
+        android:textColor="@color/colorAccent"
+        android:textSize="12sp"
+        android:padding="16dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/inspectionListContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp">
+
+            <!-- Inspection records will be dynamically added here -->
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- 4. INSPECTION DETAILS PANEL (Initially Hidden) -->
+    <LinearLayout
+        android:id="@+id/inspectionDetailsPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/cardBackground"
+        android:padding="20dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SELECTED RECORD"
+            android:textColor="@color/colorAccent"
+            android:textSize="12sp"
+            android:layout_marginBottom="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Panel:"
+                android:textColor="@color/colorLightGray"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/detailPanelIdLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PNL-A7-4402"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Fault:"
+                android:textColor="@color/colorLightGray"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/detailFaultLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hotspot"
+                android:textColor="@color/statusCritical"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="ΔT:"
+                android:textColor="@color/colorLightGray"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/detailDeltaTempLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+18.5°C"
+                android:textColor="@color/statusCritical"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Timestamp:"
+                android:textColor="@color/colorLightGray"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/detailTimestampLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aug 7 14:02"
+                android:textColor="@color/white"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Inspector:"
+                android:textColor="@color/colorLightGray"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/detailInspectorLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Inspector_12"
+                android:textColor="@color/white"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="GPS:"
+                android:textColor="@color/colorLightGray"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/detailGpsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="36.1, -115.2"
+                android:textColor="@color/white"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="THERMAL IMAGE PREVIEW"
+            android:textColor="@color/colorAccent"
+            android:textSize="11sp"
+            android:layout_marginBottom="8dp"/>
+
+        <View
+            android:id="@+id/thermalImagePreview"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:background="@color/colorPrimary"
+            android:layout_marginBottom="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:layout_marginBottom="12dp">
+
+            <Button
+                android:id="@+id/buttonViewFullImage"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="56dp"
+                android:text="View Full Image"
+                android:textSize="13sp"
+                android:backgroundTint="@color/colorAccent"
+                android:textColor="@color/black"
+                android:layout_marginEnd="8dp"
+                android:layout_gravity="center_vertical"/>
+
+            <Button
+                android:id="@+id/buttonOpenOnMap"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="56dp"
+                android:text="Open on Map"
+                android:textSize="13sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:layout_marginEnd="8dp"
+                android:layout_gravity="center_vertical"/>
+
+            <Button
+                android:id="@+id/buttonReinspectPanel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="56dp"
+                android:text="Reinspect"
+                android:textSize="13sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonCloseDetails"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Close"
+            android:textSize="13sp"
+            android:backgroundTint="@color/colorLightGray"
+            android:textColor="@color/black"/>
+    </LinearLayout>
+
+    <!-- 5. ACTION CONTROLS -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:baselineAligned="false"
+        android:background="@color/black"
+        android:padding="16dp">
+
+        <Button
+            android:id="@+id/buttonExportRecord"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="56dp"
+            android:text="Export"
+            android:textSize="14sp"
+            android:backgroundTint="@color/colorAccent"
+            android:textColor="@color/black"
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center_vertical"/>
+
+        <Button
+            android:id="@+id/buttonGenerateReport"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="56dp"
+            android:text="Report"
+            android:textSize="14sp"
+            android:backgroundTint="@color/white"
+            android:textColor="@color/black"
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center_vertical"/>
+
+        <Button
+            android:id="@+id/buttonDeleteRecord"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="56dp"
+            android:text="Delete"
+            android:textSize="14sp"
+            android:backgroundTint="@color/statusCritical"
+            android:textColor="@color/white"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+</LinearLayout>

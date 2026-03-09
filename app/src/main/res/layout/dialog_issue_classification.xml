@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/cardBackground"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SELECT ISSUE TYPE"
+        android:textColor="@color/colorAccent"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/buttonIssueHotspot"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="Hotspot"
+        android:textSize="16sp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:layout_marginBottom="12dp"/>
+
+    <Button
+        android:id="@+id/buttonIssueDiode"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="Diode Failure"
+        android:textSize="16sp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:layout_marginBottom="12dp"/>
+
+    <Button
+        android:id="@+id/buttonIssueCellCrack"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="Cell Crack"
+        android:textSize="16sp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:layout_marginBottom="12dp"/>
+
+    <Button
+        android:id="@+id/buttonIssueConnection"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="Connection Fault"
+        android:textSize="16sp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:layout_marginBottom="12dp"/>
+
+    <Button
+        android:id="@+id/buttonIssueOther"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="Other"
+        android:textSize="16sp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SUGGESTED SEVERITY"
+        android:textColor="@color/colorAccent"
+        android:textSize="12sp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/suggestedSeverityLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CRITICAL\nΔT = 18.5°C"
+        android:textColor="@color/statusCritical"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/buttonCancelIssue"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Cancel"
+        android:textSize="14sp"
+        android:backgroundTint="@color/colorLightGray"
+        android:textColor="@color/black"/>
+
+</LinearLayout>

@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">SolarSnap</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="company_id">Company ID</string>
+    <string name="site_selection">Site Selection</string>
+    <string name="start_inspection">Start Inspection</string>
+    <string name="scan_capture">Scan &amp; Capture</string>
+    <string name="capture">Capture</string>
+    <string name="scan_asset">Scan Asset</string>
+    <string name="confirm">Confirm</string>
+    <string name="retake">Retake</string>
+    <string name="flag_issue">Flag Issue</string>
+    <string name="save">Save</string>
+    <string name="sync">Sync</string>
+    <string name="thermal">Thermal</string>
+    <string name="visual">Visual</string>
+    <string name="asset_id">Asset ID</string>
+    <string name="temperature">Temperature</string>
+    <string name="status">Status</string>
+    <string name="critical">Critical</string>
+    <string name="warning">Warning</string>
+    <string name="healthy">Healthy</string>
+    <string name="start_new_inspection">START NEW INSPECTION</string>
+    <string name="continue_inspection">CONTINUE INSPECTION</string>
+    <string name="quick_scan_mode">QUICK SCAN MODE</string>
+</resources>

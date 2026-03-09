@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/black">
+
+    <!-- 1. BREADCRUMB NAVIGATION -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/colorPrimary"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Home > SolarSnap > Inspection"
+            android:textColor="@color/white"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/gpsIconLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📡"
+            android:textColor="@color/statusHealthy"
+            android:textSize="16sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/cloudIconLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="☁"
+            android:textColor="@color/statusHealthy"
+            android:textSize="16sp"
+            android:paddingEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/batteryIconLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔋"
+            android:textColor="@color/statusHealthy"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <!-- 2. LIVE THERMAL CAMERA FEED (70% of screen) -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="7"
+        android:background="@color/black">
+
+        <android.opengl.GLSurfaceView
+            android:id="@+id/glSurface"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <!-- 3. DETECTION OVERLAY -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Temperature Display -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@color/cardBackground"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/maxTempLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Max Temp: 58.2°C"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="16dp"/>
+
+                <TextView
+                    android:id="@+id/deltaTempLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ΔT: +18.5°C"
+                    android:textColor="@color/statusCritical"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- Detection Status -->
+            <LinearLayout
+                android:id="@+id/detectionStatusPanel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/statusCritical"
+                android:padding="12dp"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/detectionStatusLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hotspot Detected"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/detectionConfidenceLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Confidence: 94%"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- 4. PANEL ASSET INFORMATION PANEL -->
+    <LinearLayout
+        android:id="@+id/assetInfoPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/cardBackground"
+        android:padding="16dp"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PANEL ID"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:id="@+id/panelIdLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PNL-A7-4402"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ROW"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:id="@+id/rowLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="12"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="STRING"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:id="@+id/stringLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="8"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Scanning Status -->
+        <TextView
+            android:id="@+id/scanningStatusLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scanning QR / Barcode..."
+            android:textColor="@color/colorAccent"
+            android:textSize="14sp"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"/>
+
+        <!-- Confidence -->
+        <TextView
+            android:id="@+id/assetConfidenceLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confidence: 99%"
+            android:textColor="@color/statusHealthy"
+            android:textSize="14sp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Asset Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonConfirmPanel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="56dp"
+                android:text="Confirm Panel"
+                android:textSize="14sp"
+                android:backgroundTint="@color/statusHealthy"
+                android:textColor="@color/black"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/buttonRescan"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="56dp"
+                android:text="Rescan"
+                android:textSize="14sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/black"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/buttonManualEntry"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="56dp"
+                android:text="Manual"
+                android:textSize="14sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/black"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 5. CAPTURE AND ACTION CONTROLS -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/black"
+        android:padding="16dp">
+
+        <!-- Primary Capture Button -->
+        <Button
+            android:id="@+id/buttonCapture"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:text="CAPTURE IMAGE"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/colorAccent"
+            android:textColor="@color/black"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Action Buttons Row -->
+        <LinearLayout
+            android:id="@+id/actionButtonsPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/buttonFlagIssue"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="72dp"
+                android:text="FLAG ISSUE"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="@color/statusCritical"
+                android:textColor="@color/white"
+                android:layout_marginEnd="12dp"/>
+
+            <Button
+                android:id="@+id/buttonSaveInspection"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="72dp"
+                android:text="SAVE INSPECTION"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="@color/statusHealthy"
+                android:textColor="@color/black"/>
+        </LinearLayout>
+
+        <!-- Alternative: Mark as Healthy -->
+        <Button
+            android:id="@+id/buttonMarkHealthy"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:text="MARK AS HEALTHY"
+            android:textSize="18sp"
+            android:backgroundTint="@color/statusHealthy"
+            android:textColor="@color/black"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+</LinearLayout>
