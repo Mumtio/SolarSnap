@@ -19,6 +19,7 @@ public class SiteMapActivity extends AppCompatActivity {
     private int totalRows = 15;
     private int panelsPerRow = 20;
     private float zoomLevel = 1.0f;
+    private String currentFilter = "all"; // Filter state: "all", "faults", "warnings", "uninspected"
     
     // Panel status colors
     private static final int COLOR_HEALTHY = Color.parseColor("#4CAF50");
@@ -99,6 +100,14 @@ public class SiteMapActivity extends AppCompatActivity {
         
         // Simulate panel status
         int color = getPanelStatus(row, panel);
+        
+        // Apply filter - hide panels that don't match current filter
+        if (!shouldShowPanel(color)) {
+            dot.setVisibility(View.INVISIBLE);
+        } else {
+            dot.setVisibility(View.VISIBLE);
+        }
+        
         dot.setBackgroundColor(color);
         
         // Make it circular
@@ -125,6 +134,24 @@ public class SiteMapActivity extends AppCompatActivity {
             return COLOR_WARNING; // Warning
         } else {
             return COLOR_HEALTHY; // Healthy
+        }
+    }
+    
+    private boolean shouldShowPanel(int color) {
+        switch (currentFilter) {
+            case "faults":
+                // Show critical and warning panels only
+                return color == COLOR_CRITICAL || color == COLOR_WARNING;
+            case "warnings":
+                // Show warning panels only
+                return color == COLOR_WARNING;
+            case "uninspected":
+                // Show uninspected panels only
+                return color == COLOR_NOT_INSPECTED;
+            case "all":
+            default:
+                // Show all panels
+                return true;
         }
     }
     
@@ -221,8 +248,25 @@ public class SiteMapActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("FILTER PANELS")
             .setItems(filters, (dialog, which) -> {
+                // Update filter state based on selection
+                switch (which) {
+                    case 0:
+                        currentFilter = "all";
+                        break;
+                    case 1:
+                        currentFilter = "faults";
+                        break;
+                    case 2:
+                        currentFilter = "warnings";
+                        break;
+                    case 3:
+                        currentFilter = "uninspected";
+                        break;
+                }
+                
+                // Regenerate map with new filter
+                regenerateMap();
                 Toast.makeText(this, "Filter: " + filters[which], Toast.LENGTH_SHORT).show();
-                // In production, filter the map based on selection
             })
             .show();
     }
