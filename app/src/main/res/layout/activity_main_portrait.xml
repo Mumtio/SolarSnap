@@ -120,15 +120,6 @@
                     android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/detectionConfidenceLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Confidence: 94%"
-                    android:textColor="@color/white"
-                    android:textSize="14sp"
-                    android:layout_marginTop="4dp"/>
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>
@@ -229,16 +220,6 @@
             android:textSize="14sp"
             android:layout_marginBottom="12dp"
             android:visibility="gone"/>
-
-        <!-- Confidence -->
-        <TextView
-            android:id="@+id/assetConfidenceLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Confidence: 99%"
-            android:textColor="@color/statusHealthy"
-            android:textSize="14sp"
-            android:layout_marginBottom="12dp"/>
 
         <!-- Asset Action Buttons -->
         <LinearLayout

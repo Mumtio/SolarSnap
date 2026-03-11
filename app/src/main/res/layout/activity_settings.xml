@@ -547,7 +547,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="16dp">
 
                 <TextView
                     android:layout_width="0dp"
@@ -559,28 +559,6 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switchRequirePanelScan"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Enable Quick Scan Mode"
-                    android:textColor="#C3C3C3"
-                    android:textSize="14sp" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switchQuickScanMode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true" />
@@ -604,19 +582,11 @@
                     android:id="@+id/radioFullInspection"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Full Inspection"
+                    android:text="Full Inspection (Quick Scan removed)"
                     android:textColor="#FFFFFF"
                     android:textSize="14sp"
                     android:checked="true"
                     android:layout_marginBottom="8dp" />
-
-                <RadioButton
-                    android:id="@+id/radioQuickScan"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Quick Scan"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp" />
             </RadioGroup>
         </LinearLayout>
 

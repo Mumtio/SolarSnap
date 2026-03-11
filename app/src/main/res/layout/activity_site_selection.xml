@@ -227,10 +227,10 @@
                 android:layout_marginBottom="16dp"/>
 
             <Button
-                android:id="@+id/buttonQuickScan"
+                android:id="@+id/buttonRegisterSite"
                 android:layout_width="match_parent"
                 android:layout_height="72dp"
-                android:text="QUICK SCAN MODE"
+                android:text="REGISTER NEW SITE"
                 android:textSize="16sp"
                 android:backgroundTint="@color/white"
                 android:textColor="@color/black"/>

@@ -13,11 +13,11 @@ plugins {
 apply<KotlinAndroidPluginWrapper>()
 
 android {
-    namespace = "com.flir.atlassdk.acecamerasample"
+    namespace = "com.solarsnap.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.flir.atlassdk.acecamerasample"
+        applicationId = "com.solarsnap.app"
         minSdk = 33
         targetSdk = 36
         versionCode = 1
@@ -92,11 +92,26 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.jetbrains.annotations)
     implementation(libs.android.material)
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("com.google.mlkit:barcode-scanning:17.2.0")
+    implementation("com.google.zxing:core:3.5.3")
     implementation("androidx.camera:camera-camera2:1.3.0")
     implementation("androidx.camera:camera-lifecycle:1.3.0")
     implementation("androidx.camera:camera-view:1.3.0")
+
+    // Room Database (Day 9)
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    
+    // Retrofit & OkHttp (Day 10)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    
+    // Gson for JSON parsing
+    implementation("com.google.code.gson:gson:2.10.1")
+    
+    // WorkManager for background sync
+    implementation("androidx.work:work-runtime:2.9.0")
 
     implementation("", name = "androidsdk-release", ext = "aar")
     implementation("", name = "thermalsdk-release", ext = "aar")

@@ -1,7 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
 	repositories {
-		jcenter()
         google()
         mavenCentral()
     }
@@ -12,8 +11,8 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
         google()
+        mavenCentral()
     }
 }
 
