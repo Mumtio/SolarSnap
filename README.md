@@ -171,16 +171,32 @@ The app follows FLIR ACE design guidelines for rugged field use:
 - ⚪ **Gray (#757575)** - Not inspected, neutral states
 - 🔵 **Blue (#2196F3)** - Information, navigation elements
 
-## 🔧 Configuration
+## 🌐 Backend Integration
+
+The app is configured to connect to the production SolarSnap Backend API:
+- **Production API**: `https://solarsnap-backend.onrender.com/api/v1/`
+- **Health Check**: `https://solarsnap-backend.onrender.com/health`
+- **Authentication**: JWT-based with automatic token refresh
+- **Network Security**: HTTPS enforced for production, HTTP allowed for local development
+
+### Test Credentials
+```
+Email: inspector1@solartech.com
+Password: password123
+Company ID: SOLARTECH-001
+```
 
 ### App Configuration
 
-**API Endpoints** (`app/src/main/java/com/solarsnap/app/config/ApiConfig.java`):
+**API Endpoints** (`app/src/main/java/com/solarsnap/app/network/ApiClient.java`):
 ```java
-public class ApiConfig {
-    public static final String BASE_URL = "https://your-api-domain.com";
-    public static final String API_VERSION = "v1";
-    public static final int TIMEOUT_SECONDS = 30;
+public class ApiClient {
+    // Production backend URL
+    private static final String BASE_URL = "https://solarsnap-backend.onrender.com/api/v1/";
+    
+    // Alternative URLs for different environments
+    // For local development: "http://10.0.2.2:5000/api/v1/" (Android emulator)
+    // For physical device: "http://YOUR_COMPUTER_IP:5000/api/v1/"
 }
 ```
 

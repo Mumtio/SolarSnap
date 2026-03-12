@@ -11,11 +11,13 @@ import java.util.concurrent.TimeUnit;
 
 public class ApiClient {
     
-    // Change this to your backend URL
+    // Production backend URL
+    private static final String BASE_URL = "https://solarsnap-backend.onrender.com/api/v1/";
+    
+    // Alternative URLs for different environments
     // For local development: "http://10.0.2.2:5000/api/v1/" (Android emulator)
     // For physical device: "http://YOUR_COMPUTER_IP:5000/api/v1/"
-    // For production: "https://your-domain.com/api/v1/"
-    private static final String BASE_URL = "http://10.0.2.2:5000/api/v1/";
+    // For production: "https://solarsnap-backend.onrender.com/api/v1/"
     
     private static Retrofit retrofit = null;
     private static SolarSnapApiService apiService = null;
@@ -75,5 +77,10 @@ public class ApiClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build();
         apiService = retrofit.create(SolarSnapApiService.class);
+    }
+    
+    // Get current base URL for debugging
+    public static String getBaseUrl() {
+        return BASE_URL;
     }
 }

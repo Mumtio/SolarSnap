@@ -17,6 +17,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.solarsnap.app.repository.InspectionRepository;
 import com.solarsnap.app.database.entities.InspectionEntity;
+import com.solarsnap.app.network.ApiClient;
+import com.solarsnap.app.network.SolarSnapApiService;
+import com.google.gson.JsonObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +38,7 @@ public class InspectionHistoryActivity extends AppCompatActivity {
     private List<InspectionEntity> filteredRecords;
     private String currentFilter = "all";
     private InspectionRepository inspectionRepository;
+    private InspectionEntity selectedInspection;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,26 +170,34 @@ public class InspectionHistoryActivity extends AppCompatActivity {
         filteredRecords.clear();
         
         for (InspectionEntity record : allRecords) {
+            // Safe null checks
+            String panelId = record.getPanelId() != null ? record.getPanelId() : "";
             boolean matchesSearch = searchQuery.isEmpty() || 
-                record.getPanelId().toLowerCase().contains(searchQuery);
+                panelId.toLowerCase().contains(searchQuery);
             
             boolean matchesFilter = false;
+            String severity = record.getSeverity() != null ? record.getSeverity() : "HEALTHY";
+            
             switch (currentFilter) {
                 case "all":
                     matchesFilter = true;
                     break;
                 case "faults":
-                    matchesFilter = !record.getSeverity().equals("HEALTHY");
+                    matchesFilter = !severity.equals("HEALTHY");
                     break;
                 case "critical":
-                    matchesFilter = record.getSeverity().equals("CRITICAL");
+                    matchesFilter = severity.equals("CRITICAL");
                     break;
                 case "today":
                     // Check if inspection was done today
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    String today = sdf.format(new Date());
-                    String inspectionDate = sdf.format(record.getTimestamp());
-                    matchesFilter = today.equals(inspectionDate);
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                        String today = sdf.format(new Date());
+                        String inspectionDate = sdf.format(record.getTimestamp());
+                        matchesFilter = today.equals(inspectionDate);
+                    } catch (Exception e) {
+                        matchesFilter = false; // Skip if date parsing fails
+                    }
                     break;
             }
             
@@ -232,8 +247,14 @@ public class InspectionHistoryActivity extends AppCompatActivity {
         LinearLayout.LayoutParams indicatorParams = new LinearLayout.LayoutParams(8, ViewGroup.LayoutParams.MATCH_PARENT);
         colorIndicator.setLayoutParams(indicatorParams);
         
+        // Safe severity check with null handling
+        String severity = record.getSeverity();
+        if (severity == null) {
+            severity = "HEALTHY"; // Default fallback
+        }
+        
         int indicatorColor;
-        switch (record.getSeverity()) {
+        switch (severity.toUpperCase()) {
             case "CRITICAL":
                 indicatorColor = Color.parseColor("#F44336");
                 break;
@@ -258,7 +279,8 @@ public class InspectionHistoryActivity extends AppCompatActivity {
         
         // Panel ID
         TextView panelIdText = new TextView(this);
-        panelIdText.setText("Panel ID: " + record.getPanelId());
+        String panelId = record.getPanelId() != null ? record.getPanelId() : "Unknown";
+        panelIdText.setText("Panel ID: " + panelId);
         panelIdText.setTextColor(Color.WHITE);
         panelIdText.setTextSize(16);
         panelIdText.setTypeface(null, android.graphics.Typeface.BOLD);
@@ -266,7 +288,8 @@ public class InspectionHistoryActivity extends AppCompatActivity {
         
         // Site ID
         TextView locationText = new TextView(this);
-        locationText.setText("Site: " + record.getSiteId());
+        String siteId = record.getSiteId() != null ? record.getSiteId() : "Unknown";
+        locationText.setText("Site: " + siteId);
         locationText.setTextColor(Color.parseColor("#C3C3C3"));
         locationText.setTextSize(13);
         contentLayout.addView(locationText);
@@ -276,7 +299,7 @@ public class InspectionHistoryActivity extends AppCompatActivity {
         statusLayout.setOrientation(LinearLayout.HORIZONTAL);
         
         TextView statusText = new TextView(this);
-        statusText.setText("Status: " + record.getSeverity());
+        statusText.setText("Status: " + severity);
         statusText.setTextColor(indicatorColor);
         statusText.setTextSize(14);
         statusText.setTypeface(null, android.graphics.Typeface.BOLD);
@@ -308,6 +331,7 @@ public class InspectionHistoryActivity extends AppCompatActivity {
     }
     
     private void showInspectionDetails(InspectionEntity record) {
+        selectedInspection = record; // Store the selected inspection
         inspectionDetailsPanel.setVisibility(View.VISIBLE);
         
         TextView detailPanelIdLabel = findViewById(R.id.detailPanelIdLabel);
@@ -388,21 +412,149 @@ public class InspectionHistoryActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("EXPORT RECORD")
             .setItems(exportOptions, (dialog, which) -> {
-                Toast.makeText(this, "Exporting as " + exportOptions[which], 
-                    Toast.LENGTH_SHORT).show();
+                String format = "";
+                switch (which) {
+                    case 0: format = "pdf"; break;
+                    case 1: format = "csv"; break;
+                    case 2: format = "json"; break;
+                }
+                exportHistoryData(format);
             })
             .show();
     }
     
+    private void exportHistoryData(String format) {
+        Toast.makeText(this, "Exporting history as " + format.toUpperCase() + "...", 
+            Toast.LENGTH_SHORT).show();
+        
+        // Prepare export request
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("format", format);
+        requestBody.addProperty("severity", currentFilter);
+        
+        // Add search filter if active
+        String searchQuery = searchPanelInput.getText().toString();
+        if (!searchQuery.isEmpty()) {
+            requestBody.addProperty("panelId", searchQuery);
+        }
+        
+        // Call backend API
+        SolarSnapApiService apiService = ApiClient.getApiService(this);
+        apiService.exportHistory(requestBody).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject result = response.body();
+                    if (result.has("success") && result.get("success").getAsBoolean()) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(InspectionHistoryActivity.this);
+                        builder.setTitle("Export Complete")
+                            .setMessage("History export completed!\n\n" +
+                                "File: " + result.get("filename").getAsString() + "\n" +
+                                "Format: " + format.toUpperCase() + "\n" +
+                                "Records: " + result.get("recordCount").getAsString())
+                            .setPositiveButton("Download", (dialog, which) -> {
+                                Toast.makeText(InspectionHistoryActivity.this, 
+                                    "Downloading " + format.toUpperCase() + " file...", Toast.LENGTH_SHORT).show();
+                            })
+                            .setNegativeButton("Close", null)
+                            .show();
+                    } else {
+                        String error = result.has("error") && result.getAsJsonObject("error").has("message") ? 
+                            result.getAsJsonObject("error").get("message").getAsString() : "Export failed";
+                        Toast.makeText(InspectionHistoryActivity.this, error, Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(InspectionHistoryActivity.this, 
+                        "Export failed: Server error", Toast.LENGTH_LONG).show();
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(InspectionHistoryActivity.this, 
+                    "Export failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+    
     private void showDeleteConfirmation() {
+        if (selectedInspection == null) {
+            Toast.makeText(this, "No inspection selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete Record")
-            .setMessage("Are you sure you want to delete this inspection record?")
+            .setMessage("Are you sure you want to delete this inspection record?\n\n" +
+                "Panel ID: " + selectedInspection.getPanelId() + "\n" +
+                "Site: " + selectedInspection.getSiteId() + "\n" +
+                "Status: " + selectedInspection.getSeverity())
             .setPositiveButton("Delete", (dialog, which) -> {
-                Toast.makeText(this, "Record deleted", Toast.LENGTH_SHORT).show();
-                inspectionDetailsPanel.setVisibility(View.GONE);
+                deleteInspectionRecord(selectedInspection);
             })
             .setNegativeButton("Cancel", null)
             .show();
+    }
+    
+    private void deleteInspectionRecord(InspectionEntity inspection) {
+        Toast.makeText(this, "Deleting inspection record...", Toast.LENGTH_SHORT).show();
+        
+        // Prepare delete request
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("inspectionId", inspection.getInspectionUuid());
+        
+        // Call backend API
+        SolarSnapApiService apiService = ApiClient.getApiService(this);
+        apiService.deleteInspectionRecord(requestBody).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject result = response.body();
+                    if (result.has("success") && result.get("success").getAsBoolean()) {
+                        // Remove from local database
+                        inspectionRepository.deleteInspection(inspection.getInspectionUuid(), 
+                            new InspectionRepository.DeleteCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(InspectionHistoryActivity.this, 
+                                            "Record deleted successfully", Toast.LENGTH_SHORT).show();
+                                        
+                                        // Remove from lists and refresh UI
+                                        allRecords.remove(inspection);
+                                        filteredRecords.remove(inspection);
+                                        displayInspectionRecords();
+                                        
+                                        // Hide details panel
+                                        inspectionDetailsPanel.setVisibility(View.GONE);
+                                        selectedInspection = null;
+                                    });
+                                }
+                                
+                                @Override
+                                public void onError(String error) {
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(InspectionHistoryActivity.this, 
+                                            "Local delete failed: " + error, Toast.LENGTH_LONG).show();
+                                    });
+                                }
+                            });
+                    } else {
+                        String error = result.has("error") && result.getAsJsonObject("error").has("message") ? 
+                            result.getAsJsonObject("error").get("message").getAsString() : "Delete failed";
+                        Toast.makeText(InspectionHistoryActivity.this, error, Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(InspectionHistoryActivity.this, 
+                        "Delete failed: Server error", Toast.LENGTH_LONG).show();
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(InspectionHistoryActivity.this, 
+                    "Delete failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

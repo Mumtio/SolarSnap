@@ -22,7 +22,7 @@ import com.solarsnap.app.database.entities.UploadQueueEntity;
         PanelEntity.class,
         UploadQueueEntity.class
     },
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {

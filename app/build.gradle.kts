@@ -25,10 +25,30 @@ android {
         buildToolsVersion = "36.0.0"
     }
 
+    signingConfigs {
+        create("release") {
+            // You'll configure this through Android Studio UI
+            // or manually add keystore details here
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            
+            // Production optimizations - CRITICAL for avoiding virus detection
+            isDebuggable = false
+            isJniDebuggable = false
+            
+            // Remove debug info that triggers false positives
+            ndk {
+                debugSymbolLevel = "NONE"
+            }
+            
+            // Signing configuration
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 

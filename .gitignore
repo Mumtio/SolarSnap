@@ -15,3 +15,14 @@
 
 # FLIR SDK libraries (too large for GitHub - 101+ MB)
 app/libs/*.aar
+
+# CRITICAL: Protect keystore and signing credentials
+*.keystore
+*.jks
+keystore.properties
+key.properties
+signing.properties
+
+# Release APKs (large files)
+app/build/outputs/apk/release/
+*.apk

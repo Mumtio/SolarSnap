@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.solarsnap.app.repository.UploadRepository;
 import com.solarsnap.app.database.entities.UploadQueueEntity;
 import com.solarsnap.app.sync.UploadService;
+import com.solarsnap.app.network.ApiClient;
+import com.solarsnap.app.network.SolarSnapApiService;
+import com.google.gson.JsonObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,9 +41,10 @@ public class UploadsActivity extends AppCompatActivity {
     private ProgressBar uploadProgressBar;
     private TextView uploadProgressLabel;
     
-    private List<UploadQueueEntity> uploadRecords;
+    private List<UploadQueueEntity> uploadRecords = new ArrayList<>();
     private UploadRepository uploadRepository;
     private UploadService uploadService;
+    private SolarSnapApiService apiService;
     private Handler handler = new Handler();
     
     @Override
@@ -46,11 +54,11 @@ public class UploadsActivity extends AppCompatActivity {
         
         uploadRepository = new UploadRepository(this);
         uploadService = new UploadService(this);
+        apiService = ApiClient.getApiService(this);
         
         initializeViews();
         loadUploadData();
         updateNetworkStatus();
-        displayUploadRecords();
         setupButtonListeners();
     }
     
@@ -68,6 +76,7 @@ public class UploadsActivity extends AppCompatActivity {
     }
     
     private void loadUploadData() {
+        // Use backend-connected method
         uploadRepository.getAllUploads(new UploadRepository.UploadListCallback() {
             @Override
             public void onSuccess(List<UploadQueueEntity> uploads) {
@@ -87,6 +96,31 @@ public class UploadsActivity extends AppCompatActivity {
                     Toast.makeText(UploadsActivity.this, "Error loading uploads: " + error, 
                         Toast.LENGTH_SHORT).show();
                 });
+            }
+        });
+        
+        // Also update stats from backend
+        uploadRepository.getSyncStatusFromBackend(new UploadRepository.SyncStatusCallback() {
+            @Override
+            public void onSuccess(int pending, int uploading, int completed, int failed) {
+                runOnUiThread(() -> {
+                    pendingCountLabel.setText(String.valueOf(pending));
+                    uploadingCountLabel.setText(String.valueOf(uploading));
+                    completedCountLabel.setText(String.valueOf(completed));
+                    failedCountLabel.setText(String.valueOf(failed));
+                    
+                    // Calculate progress
+                    int total = pending + uploading + completed + failed;
+                    int progress = total > 0 ? (completed * 100) / total : 0;
+                    uploadProgressBar.setProgress(progress);
+                    uploadProgressLabel.setText(progress + "% complete");
+                });
+            }
+            
+            @Override
+            public void onError(String error) {
+                Log.w("UploadsActivity", "Failed to get backend sync status: " + error);
+                // Local stats will be used as fallback
             }
         });
     }
@@ -153,7 +187,7 @@ public class UploadsActivity extends AppCompatActivity {
     private void displayUploadRecords() {
         uploadsListContainer.removeAllViews();
         
-        if (uploadRecords.isEmpty()) {
+        if (uploadRecords == null || uploadRecords.isEmpty()) {
             TextView emptyView = new TextView(this);
             emptyView.setText("No pending uploads");
             emptyView.setTextColor(Color.parseColor("#C3C3C3"));
@@ -218,24 +252,28 @@ public class UploadsActivity extends AppCompatActivity {
         );
         contentLayout.setLayoutParams(contentParams);
         
-        // Panel ID
+        // Panel ID and Site
         TextView panelIdText = new TextView(this);
-        panelIdText.setText("Panel: " + record.getPanelId());
+        String panelId = record.getPanelId() != null ? record.getPanelId() : "Panel-" + record.getInspectionId();
+        String siteId = record.getSiteId() != null ? record.getSiteId() : "Unknown Site";
+        panelIdText.setText("Panel: " + panelId + " (" + siteId + ")");
         panelIdText.setTextColor(Color.WHITE);
         panelIdText.setTextSize(16);
         panelIdText.setTypeface(null, android.graphics.Typeface.BOLD);
         contentLayout.addView(panelIdText);
         
-        // File type and path
+        // File type and size
         TextView fileInfoText = new TextView(this);
-        fileInfoText.setText("Type: " + record.getFileType() + "  Path: " + record.getFilePath());
+        String fileType = record.getFileType() != null ? record.getFileType() : "thermal_image";
+        String fileSize = record.getFormattedFileSize();
+        fileInfoText.setText("Type: " + fileType + "  Size: " + fileSize);
         fileInfoText.setTextColor(Color.parseColor("#C3C3C3"));
         fileInfoText.setTextSize(13);
         contentLayout.addView(fileInfoText);
         
         // Created time
         TextView createdText = new TextView(this);
-        createdText.setText("Created: " + record.getCreatedAt());
+        createdText.setText("Created: " + record.getFormattedCreatedAt());
         createdText.setTextColor(Color.parseColor("#C3C3C3"));
         createdText.setTextSize(12);
         contentLayout.addView(createdText);
@@ -306,15 +344,26 @@ public class UploadsActivity extends AppCompatActivity {
     }
     
     private void showRecordDetails(UploadQueueEntity record) {
-        String details = "Panel ID: " + record.getPanelId() + "\n" +
-                        "File Type: " + record.getFileType() + "\n" +
-                        "File Path: " + record.getFilePath() + "\n" +
-                        "Status: " + record.getStatus() + "\n" +
-                        "Created: " + record.getCreatedAt() + "\n" +
-                        "Retry Count: " + record.getRetryCount();
+        String panelId = record.getPanelId() != null ? record.getPanelId() : "Panel-" + record.getInspectionId();
+        String siteId = record.getSiteId() != null ? record.getSiteId() : "Unknown Site";
+        String fileType = record.getFileType() != null ? record.getFileType() : "thermal_image";
+        String backendId = record.getBackendUploadId() != null ? record.getBackendUploadId() : "Not synced";
+        
+        String details = "Panel ID: " + panelId + "\n" +
+                        "Site ID: " + siteId + "\n" +
+                        "File Type: " + fileType + "\n" +
+                        "File Size: " + record.getFormattedFileSize() + "\n" +
+                        "Status: " + record.getStatus().toUpperCase() + "\n" +
+                        "Created: " + record.getFormattedCreatedAt() + "\n" +
+                        "Retry Count: " + record.getRetryCount() + "\n" +
+                        "Backend ID: " + backendId;
+        
+        if (record.getErrorMessage() != null && !record.getErrorMessage().isEmpty()) {
+            details += "\n\nError: " + record.getErrorMessage();
+        }
         
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Record Details")
+        builder.setTitle("Upload Record Details")
             .setMessage(details)
             .setPositiveButton("Close", null)
             .show();

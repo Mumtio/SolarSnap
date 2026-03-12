@@ -162,6 +162,29 @@ public class InspectionRepository {
         });
     }
     
+    // Delete inspection by UUID
+    public interface DeleteCallback {
+        void onSuccess();
+        void onError(String error);
+    }
+    
+    public void deleteInspection(String inspectionUuid, DeleteCallback callback) {
+        executor.execute(() -> {
+            try {
+                InspectionEntity inspection = inspectionDao.getInspectionByUuid(inspectionUuid);
+                if (inspection != null) {
+                    inspectionDao.delete(inspection);
+                    Log.d(TAG, "Inspection deleted by UUID: " + inspectionUuid);
+                    callback.onSuccess();
+                } else {
+                    callback.onError("Inspection not found: " + inspectionUuid);
+                }
+            } catch (Exception e) {
+                callback.onError("Failed to delete inspection: " + e.getMessage());
+            }
+        });
+    }
+    
     // Get inspection statistics
     public interface StatisticsCallback {
         void onSuccess(int total, int critical, int warning, int healthy);

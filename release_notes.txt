@@ -1,0 +1,121 @@
+SolarSnap Android App - Release Notes
+Version: 1.0.0
+Build Date: March 13, 2026
+Package: com.solarsnap.app
+Target SDK: 36 (Android 14)
+
+=== RELEASE OVERVIEW ===
+Production release of SolarSnap Android application for FLIR ACE thermal camera integration. This is a professional solar panel inspection system designed for field technicians conducting thermal inspections of solar farms.
+
+=== NEW FEATURES ===
+• Complete thermal inspection workflow with FLIR ACE SDK 2.17.0 integration
+• Real-time thermal imaging with live temperature measurement and hotspot detection
+• Dual-view display (thermal + visual) for comprehensive panel analysis
+• GPS-based location tracking for accurate fault positioning
+• Interactive site mapping with up to 1,200+ panel visualization
+• Offline-first operation with automatic cloud synchronization
+• Comprehensive inspection history with search and filtering capabilities
+• Barcode scanning for panel ID verification
+• Enterprise-grade security with JWT authentication
+• Role-based access control (Inspector, Manager, Admin)
+• Background sync service for seamless data upload
+• ACE-compliant UI optimized for 4" field devices with high contrast design
+• Physical button navigation support for glove-friendly operation
+
+=== TECHNICAL SPECIFICATIONS ===
+• Minimum Android Version: API 33 (Android 13)
+• Target Android Version: API 36 (Android 14)
+• Architecture: ARM64-v8a (64-bit)
+• Java Version: 21 (JDK 21 required for compilation)
+• FLIR SDK: Atlas Android SDK 2.17.0
+• Build Type: Release (signed, optimized, obfuscated)
+• APK Size: ~95MB (includes FLIR SDK libraries)
+
+=== CORE FUNCTIONALITY ===
+1. Authentication System
+   - Secure login with company-level access control
+   - JWT token management with automatic refresh
+   - Test credentials: inspector1@solartech.com / password123 / SOLARTECH-001
+
+2. Thermal Inspection Workflow
+   - Connect to FLIR ACE thermal camera via USB
+   - Live thermal feed with temperature overlay
+   - One-touch thermal image capture with GPS coordinates
+   - Automatic temperature delta calculation for fault severity
+   - Panel-by-panel inspection progress tracking
+
+3. Site Management
+   - Interactive site mapping with fault visualization
+   - Real-time inspection status updates
+   - GPS-based panel location tracking
+   - Comprehensive inspection metadata collection
+
+4. Data Management
+   - SQLite local database for offline operation
+   - Background synchronization with cloud backend
+   - Image compression and optimization for efficient storage
+   - Upload queue management with retry logic
+
+5. Reporting & Analytics
+   - Inspection history browser with advanced filtering
+   - Progress tracking with completion statistics
+   - Export capabilities for inspection reports
+   - Real-time sync status monitoring
+
+=== BACKEND INTEGRATION ===
+• Production API: https://solarsnap-backend.onrender.com/api/v1/
+• Health Check: https://solarsnap-backend.onrender.com/health
+• Authentication: JWT-based with automatic token refresh
+• Network Security: HTTPS enforced, certificate pinning enabled
+
+=== PERMISSIONS REQUIRED ===
+• Camera: Thermal imaging and visual capture
+• Location: GPS coordinates for fault positioning
+• Storage: Local data and image storage
+• Network: API communication and sync
+• Vibration: Haptic feedback for user interactions
+
+=== DEVICE COMPATIBILITY ===
+• Optimized for FLIR ACE thermal cameras
+• Supports Android tablets and smartphones (4"+ screens)
+• Requires USB OTG support for camera connectivity
+• Minimum 4GB RAM recommended for optimal performance
+• 2GB free storage space required for app and data
+
+=== SECURITY FEATURES ===
+• Encrypted local data storage
+• Secure HTTPS communication
+• JWT token-based authentication
+• Role-based access control
+• Automatic session timeout
+• Certificate pinning for API security
+
+=== KNOWN LIMITATIONS ===
+• Requires FLIR ACE thermal camera for full functionality
+• GPS accuracy dependent on device capabilities and environment
+• Large thermal images may require WiFi for efficient upload
+• Offline mode limited to local storage capacity
+
+=== TESTING RECOMMENDATIONS ===
+1. Verify FLIR ACE camera connection and thermal imaging
+2. Test GPS accuracy in outdoor environment
+3. Validate offline operation and sync functionality
+4. Confirm authentication with provided test credentials
+5. Test physical button navigation on target ACE device
+6. Verify high contrast UI visibility in bright sunlight conditions
+
+=== SUPPORT INFORMATION ===
+• FLIR SDK Version: 2.17.0
+• Minimum Java Version: JDK 21
+• Build Tools: Android Gradle Plugin 8.0+
+• Emulator Support: Available with CSQ thermal files
+• Documentation: Complete README.md included
+
+=== DEPLOYMENT NOTES ===
+• Release APK is signed and optimized for production use
+• ProGuard obfuscation enabled for code protection
+• ABI splitting configured for ARM64-v8a architecture only
+• Legacy packaging enabled for maximum compatibility
+• Debug symbols removed for security and size optimization
+
+This release represents a complete, production-ready thermal inspection solution specifically designed for FLIR ACE platform integration and solar farm maintenance workflows.

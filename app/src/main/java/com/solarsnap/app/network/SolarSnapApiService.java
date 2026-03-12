@@ -103,6 +103,9 @@ public interface SolarSnapApiService {
     @POST("sync/clear-completed")
     Call<JsonObject> clearCompletedUploads();
     
+    @GET("sync/device-storage")
+    Call<JsonObject> getDeviceStorage();
+    
     // ==================== Reports Endpoints ====================
     
     @GET("reports/site/{siteId}")
@@ -130,8 +133,14 @@ public interface SolarSnapApiService {
     @POST("reports/export-data")
     Call<JsonObject> exportData(@Body JsonObject request);
     
-    @POST("sync/cloud")
+    @POST("reports/cloud-sync")
     Call<JsonObject> syncToCloud(@Body JsonObject request);
+    
+    @POST("reports/export-history")
+    Call<JsonObject> exportHistory(@Body JsonObject request);
+    
+    @DELETE("reports/delete-record")
+    Call<JsonObject> deleteInspectionRecord(@Body JsonObject request);
     
     @GET("reports/temperature-distribution")
     Call<JsonObject> getTemperatureDistribution(@Query("siteId") String siteId);

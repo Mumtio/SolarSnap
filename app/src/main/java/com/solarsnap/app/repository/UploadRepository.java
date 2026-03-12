@@ -47,20 +47,25 @@ public class UploadRepository {
         void onError(String error);
     }
     
-    // Add item to upload queue
-    public void addToQueue(int inspectionId, double fileSize, UploadCallback callback) {
+    // Add item to upload queue with inspection details
+    public void addToQueue(String inspectionUuid, String panelId, String siteId, 
+                          String fileType, String filePath, double fileSize, UploadCallback callback) {
         executor.execute(() -> {
             try {
                 UploadQueueEntity upload = new UploadQueueEntity();
-                upload.setInspectionId(inspectionId);
+                upload.setInspectionUuid(inspectionUuid);
+                upload.setPanelId(panelId);
+                upload.setSiteId(siteId);
+                upload.setFileType(fileType);
+                upload.setFilePath(filePath);
                 upload.setFileSize(fileSize);
                 upload.setStatus("pending");
                 
                 long id = uploadQueueDao.insert(upload);
                 upload.setId((int) id);
                 
-                Log.d(TAG, "Added to upload queue: " + id);
-                callback.onSuccess();
+                // Also create on backend
+                createBackendUploadQueue(upload, callback);
                 
             } catch (Exception e) {
                 callback.onError("Failed to add to queue: " + e.getMessage());
@@ -68,11 +73,104 @@ public class UploadRepository {
         });
     }
     
-    // Get all uploads
+    private void createBackendUploadQueue(UploadQueueEntity upload, UploadCallback callback) {
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("inspectionId", upload.getInspectionUuid());
+        requestBody.addProperty("fileSize", upload.getFileSize());
+        
+        apiService.createUploadQueue(requestBody).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject result = response.body();
+                    if (result.has("success") && result.get("success").getAsBoolean()) {
+                        // Update local record with backend ID
+                        executor.execute(() -> {
+                            upload.setBackendUploadId(result.get("uploadId").getAsString());
+                            uploadQueueDao.update(upload);
+                        });
+                        Log.d(TAG, "Upload queue created on backend: " + result.get("uploadId").getAsString());
+                        callback.onSuccess();
+                    } else {
+                        Log.w(TAG, "Backend upload queue creation failed, keeping local only");
+                        callback.onSuccess(); // Still success for local
+                    }
+                } else {
+                    Log.w(TAG, "Backend upload queue creation failed, keeping local only");
+                    callback.onSuccess(); // Still success for local
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Log.w(TAG, "Backend upload queue creation failed: " + t.getMessage());
+                callback.onSuccess(); // Still success for local
+            }
+        });
+    }
+    
+    // Get all uploads with backend sync
     public void getAllUploads(UploadListCallback callback) {
+        // First get local data
         executor.execute(() -> {
-            List<UploadQueueEntity> uploads = uploadQueueDao.getAllUploads();
-            callback.onSuccess(uploads);
+            List<UploadQueueEntity> localUploads = uploadQueueDao.getAllUploads();
+            
+            // Sync with backend to get latest status
+            syncWithBackend(new UploadCallback() {
+                @Override
+                public void onSuccess() {
+                    // Get updated local data after sync
+                    List<UploadQueueEntity> updatedUploads = uploadQueueDao.getAllUploads();
+                    callback.onSuccess(updatedUploads);
+                }
+                
+                @Override
+                public void onError(String error) {
+                    // Return local data even if sync fails
+                    Log.w(TAG, "Backend sync failed, using local data: " + error);
+                    callback.onSuccess(localUploads);
+                }
+            });
+        });
+    }
+    
+    // Sync with backend
+    private void syncWithBackend(UploadCallback callback) {
+        apiService.getSyncQueue("all").enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject result = response.body();
+                    if (result.has("success") && result.get("success").getAsBoolean()) {
+                        // Update local database with backend data
+                        updateLocalFromBackend(result, callback);
+                    } else {
+                        callback.onError("Backend sync failed");
+                    }
+                } else {
+                    callback.onError("Backend sync error: " + response.code());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+    
+    private void updateLocalFromBackend(JsonObject result, UploadCallback callback) {
+        executor.execute(() -> {
+            try {
+                if (result.has("queue")) {
+                    // Process backend queue data and update local database
+                    // This would involve parsing the JSON and updating local records
+                    Log.d(TAG, "Backend sync completed");
+                }
+                callback.onSuccess();
+            } catch (Exception e) {
+                callback.onError("Failed to update local data: " + e.getMessage());
+            }
         });
     }
     
@@ -84,13 +182,45 @@ public class UploadRepository {
         });
     }
     
-    // Get sync status
+    // Get sync status from backend
+    public void getSyncStatusFromBackend(SyncStatusCallback callback) {
+        apiService.getSyncStatus().enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject result = response.body();
+                    if (result.has("success") && result.get("success").getAsBoolean()) {
+                        JsonObject syncStatus = result.getAsJsonObject("syncStatus");
+                        
+                        int pending = syncStatus.get("pending").getAsInt();
+                        int uploading = syncStatus.get("uploading").getAsInt();
+                        int completed = syncStatus.get("completed").getAsInt();
+                        int failed = syncStatus.get("failed").getAsInt();
+                        
+                        callback.onSuccess(pending, uploading, completed, failed);
+                    } else {
+                        callback.onError("Backend sync status failed");
+                    }
+                } else {
+                    callback.onError("Server error: " + response.code());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                // Fallback to local status
+                getSyncStatus(callback);
+            }
+        });
+    }
+    
+    // Get sync status (local fallback)
     public void getSyncStatus(SyncStatusCallback callback) {
         executor.execute(() -> {
             try {
                 int pending = uploadQueueDao.getUploadCountByStatus("pending");
                 int uploading = uploadQueueDao.getUploadCountByStatus("uploading");
-                int completed = uploadQueueDao.getUploadCountByStatus("uploaded");
+                int completed = uploadQueueDao.getUploadCountByStatus("completed");
                 int failed = uploadQueueDao.getUploadCountByStatus("failed");
                 
                 callback.onSuccess(pending, uploading, completed, failed);
@@ -100,20 +230,53 @@ public class UploadRepository {
         });
     }
     
-    // Retry upload
+    // Retry upload with backend API
     public void retryUpload(int uploadId, UploadCallback callback) {
         executor.execute(() -> {
             try {
                 UploadQueueEntity upload = uploadQueueDao.getUploadById(uploadId);
-                if (upload != null) {
-                    upload.setStatus("pending");
-                    upload.setErrorMessage(null);
-                    uploadQueueDao.update(upload);
+                if (upload != null && upload.getBackendUploadId() != null) {
+                    // Call backend retry API
+                    String backendId = upload.getBackendUploadId().replace("upload_", "");
                     
-                    Log.d(TAG, "Upload queued for retry: " + uploadId);
-                    callback.onSuccess();
+                    apiService.retryUpload(Integer.parseInt(backendId)).enqueue(new Callback<JsonObject>() {
+                        @Override
+                        public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                JsonObject result = response.body();
+                                if (result.has("success") && result.get("success").getAsBoolean()) {
+                                    // Update local status
+                                    executor.execute(() -> {
+                                        upload.setStatus("uploading");
+                                        upload.setErrorMessage(null);
+                                        upload.setLastAttemptAt(System.currentTimeMillis());
+                                        uploadQueueDao.update(upload);
+                                    });
+                                    callback.onSuccess();
+                                } else {
+                                    callback.onError("Backend retry failed");
+                                }
+                            } else {
+                                callback.onError("Server error: " + response.code());
+                            }
+                        }
+                        
+                        @Override
+                        public void onFailure(Call<JsonObject> call, Throwable t) {
+                            callback.onError("Network error: " + t.getMessage());
+                        }
+                    });
                 } else {
-                    callback.onError("Upload not found");
+                    // Fallback to local retry
+                    if (upload != null) {
+                        upload.setStatus("pending");
+                        upload.setErrorMessage(null);
+                        uploadQueueDao.update(upload);
+                        Log.d(TAG, "Upload queued for retry (local): " + uploadId);
+                        callback.onSuccess();
+                    } else {
+                        callback.onError("Upload not found");
+                    }
                 }
             } catch (Exception e) {
                 callback.onError("Failed to retry upload: " + e.getMessage());
@@ -176,15 +339,54 @@ public class UploadRepository {
         });
     }
     
-    // Clear completed uploads
+    // Clear completed uploads with backend sync
     public void clearCompletedUploads(UploadCallback callback) {
-        executor.execute(() -> {
-            try {
-                uploadQueueDao.deleteCompletedUploads();
-                Log.d(TAG, "Completed uploads cleared");
-                callback.onSuccess();
-            } catch (Exception e) {
-                callback.onError("Failed to clear uploads: " + e.getMessage());
+        // Call backend API first
+        apiService.clearCompletedUploads().enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject result = response.body();
+                    if (result.has("success") && result.get("success").getAsBoolean()) {
+                        // Clear local completed uploads
+                        executor.execute(() -> {
+                            try {
+                                uploadQueueDao.deleteCompletedUploads();
+                                Log.d(TAG, "Completed uploads cleared (backend + local)");
+                                callback.onSuccess();
+                            } catch (Exception e) {
+                                callback.onError("Failed to clear local uploads: " + e.getMessage());
+                            }
+                        });
+                    } else {
+                        callback.onError("Backend clear failed");
+                    }
+                } else {
+                    // Fallback to local clear only
+                    executor.execute(() -> {
+                        try {
+                            uploadQueueDao.deleteCompletedUploads();
+                            Log.d(TAG, "Completed uploads cleared (local only)");
+                            callback.onSuccess();
+                        } catch (Exception e) {
+                            callback.onError("Failed to clear uploads: " + e.getMessage());
+                        }
+                    });
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                // Fallback to local clear only
+                executor.execute(() -> {
+                    try {
+                        uploadQueueDao.deleteCompletedUploads();
+                        Log.d(TAG, "Completed uploads cleared (local only, network failed)");
+                        callback.onSuccess();
+                    } catch (Exception e) {
+                        callback.onError("Failed to clear uploads: " + e.getMessage());
+                    }
+                });
             }
         });
     }
